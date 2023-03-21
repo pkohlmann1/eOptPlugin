@@ -11,8 +11,28 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.pkohlmann1.testplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
     </extensions>
+    <actions>
+        <group id="TestPlugin.HelloAction" text="EEA" description="Energy-Effifiency-Assistant">
+            <add-to-group group-id="MainMenu" anchor="last"/>
+            <action class="com.github.pkohlmann1.testplugin.actions.About" id="TestPlugin.Actions.About" text="About"/>
+            <action class="com.github.pkohlmann1.testplugin.actions.Instruction" id="TestPlugin.Actions.Instruction" text="Instruction"/>
+            <action class="com.github.pkohlmann1.testplugin.actions.Refactor" id="TestPlugin.Actions.Refactor" text="Refactor"/>
+            <action
+                    id="EditorBasics.EditorIllustrationAction"
+                    class="com.github.pkohlmann1.testplugin.actions.EditorIllustrationAction"
+                    text="Editor Replace Text"
+                    description="Replaces selected text with 'Replacement'."
+                    icon="SdkIcons.Sdk_default_icon">
+                <add-to-group group-id="EditorPopupMenu" anchor="first"/>
+            </action>
+        </group>
+    </actions>
 
     <applicationListeners>
         <listener class="com.github.pkohlmann1.testplugin.listeners.MyFrameStateListener" topic="com.intellij.ide.FrameStateListener"/>
+        <listener class="com.github.pkohlmann1.testplugin.listeners.MyVfsListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
     </applicationListeners>
+    <projectListeners>
+        <listener class="com.github.pkohlmann1.testplugin.listeners.MyToolWindowListener" topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
+    </projectListeners>
 </idea-plugin>
