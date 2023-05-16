@@ -5,29 +5,108 @@
     <vendor>pkohlmann1</vendor>
 
     <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
 
     <resource-bundle>messages.MyBundle</resource-bundle>
+    <resource-bundle>messages.InspectionBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.pkohlmann1.testplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
+        <localInspection language="JAVA"
+                         displayName="Simplify nested loop inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.simplifyloop.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.SimplifyNestedLoopInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Introducing explaining variables inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.variables.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.IntroduceExplainingVariableInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Encapsulating field inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.encapsulating.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.EncapsulateFieldInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Network communication inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.network.communication.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.NetworkCommunicationInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Polling inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.polling.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.PollingInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Database communication inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.database.communication.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.DatabaseCommunicationInspection"/>
+        <localInspection language="JAVA"
+                         displayName="File usage inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.file.usage.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.FileUsageInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Bulk operations inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.bulkoperations.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.BulkOperationInspection"/>
     </extensions>
     <actions>
         <group id="TestPlugin.HelloAction" text="EEA" description="Energy-Effifiency-Assistant">
             <add-to-group group-id="MainMenu" anchor="last"/>
             <action class="com.github.pkohlmann1.testplugin.actions.About" id="TestPlugin.Actions.About" text="About"/>
             <action class="com.github.pkohlmann1.testplugin.actions.Instruction" id="TestPlugin.Actions.Instruction" text="Instruction"/>
-            <action class="com.github.pkohlmann1.testplugin.actions.Refactor" id="TestPlugin.Actions.Refactor" text="Refactor"/>
+            <action class="com.github.pkohlmann1.testplugin.actions.FileChecker" id="TestPlugin.Actions.FileChecker" text="FileChecker"/>
             <action
                     id="EditorBasics.EditorIllustrationAction"
                     class="com.github.pkohlmann1.testplugin.actions.EditorIllustrationAction"
                     text="Editor Replace Text"
                     description="Replaces selected text with 'Replacement'."
-                    icon="SdkIcons.Sdk_default_icon">
-                <add-to-group group-id="EditorPopupMenu" anchor="first"/>
-            </action>
-        </group>
+            />
+    </group>
     </actions>
-
     <applicationListeners>
         <listener class="com.github.pkohlmann1.testplugin.listeners.MyFrameStateListener" topic="com.intellij.ide.FrameStateListener"/>
         <listener class="com.github.pkohlmann1.testplugin.listeners.MyVfsListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>

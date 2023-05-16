@@ -14,13 +14,10 @@ class EditorIllustrationAction: AnAction() {
         val project: Project? = e.project
         val editor: Editor? = e.getData(CommonDataKeys.EDITOR)
 
-        // Work off of the primary caret to get the selection info
         val primaryCaret: Caret? = editor?.caretModel?.primaryCaret
         val start = primaryCaret?.selectionStart
         val end = primaryCaret?.selectionEnd
 
-        // Replace the selection with a fixed string.
-        // Must do this document change in a write action context.
         WriteCommandAction.runWriteCommandAction(project) {
             if (start != null) {
                 if (end != null) {
@@ -29,7 +26,6 @@ class EditorIllustrationAction: AnAction() {
             }
         }
 
-        // De-select the text range that was just replaced
         primaryCaret?.removeSelection();
     }
 }

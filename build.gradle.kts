@@ -27,6 +27,12 @@ repositories {
     mavenCentral()
 }
 
+dependencies {
+    implementation("org.springframework:spring-web:5.3.12")
+    // Weitere Abhängigkeiten können hier hinzugefügt werden
+}
+
+
 // Set the JVM language level used to build the project. Use Java 11 for 2020.3+, and Java 17 for 2022.2+.
 kotlin {
     jvmToolchain(11)
