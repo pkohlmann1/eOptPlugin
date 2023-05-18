@@ -1,4 +1,4 @@
-package com.github.pkohlmann1.testplugin.inspections
+package com.github.pkohlmann1.testplugin.inspections.refactoring
 
 import com.intellij.codeInspection.*
 import com.intellij.openapi.project.Project

@@ -1,12 +1,10 @@
-package com.github.pkohlmann1.testplugin.inspections
+package com.github.pkohlmann1.testplugin.inspections.generalRules
 
-import com.github.pkohlmann1.testplugin.detectors.ImportStatementMethodCallDetector
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.JavaElementVisitor
 import com.intellij.psi.PsiElementVisitor
 import com.intellij.psi.PsiImportStatement
-import com.intellij.psi.PsiJavaFile
 
 class DatabaseCommunicationInspection: AbstractBaseJavaLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {

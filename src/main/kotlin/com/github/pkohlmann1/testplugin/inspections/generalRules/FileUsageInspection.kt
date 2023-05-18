@@ -1,4 +1,4 @@
-package com.github.pkohlmann1.testplugin.inspections
+package com.github.pkohlmann1.testplugin.inspections.generalRules
 
 import com.github.pkohlmann1.testplugin.InspectionBundle
 import com.github.pkohlmann1.testplugin.detectors.FileDetector

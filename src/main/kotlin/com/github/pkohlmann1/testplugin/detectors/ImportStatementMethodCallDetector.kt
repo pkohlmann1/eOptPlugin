@@ -1,6 +1,5 @@
 package com.github.pkohlmann1.testplugin.detectors
 
-import com.github.pkohlmann1.testplugin.inspections.NetworkCommunicationInspection
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.JavaRecursiveElementVisitor

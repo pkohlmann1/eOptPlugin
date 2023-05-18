@@ -13,6 +13,46 @@
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow factoryClass="com.github.pkohlmann1.testplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <localInspection language="JAVA"
+                         displayName="Static variable inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.staticvariables.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.StaticVariablesInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Prefer int and long types"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.typeoptimization.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.TypeOptimizationInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Prefer comparison to zero inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.comparisonzero.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.PreferComparisontoZeroInspection"/>
+        <localInspection language="JAVA"
+                         displayName="Prefer Integer Loop counters inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.loopcounters.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.PreferIntegerLoopCounterInspection"/>
+        <localInspection language="JAVA"
                          displayName="Simplify nested loop inspection"
                          bundle="messages.InspectionBundle"
                          key="inspection.detecting.simplifyloop.display.name"
@@ -21,7 +61,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.SimplifyNestedLoopInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.refactoring.SimplifyNestedLoopInspection"/>
         <localInspection language="JAVA"
                          displayName="Introducing explaining variables inspection"
                          bundle="messages.InspectionBundle"
@@ -31,7 +71,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.IntroduceExplainingVariableInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.refactoring.IntroduceExplainingVariableInspection"/>
         <localInspection language="JAVA"
                          displayName="Encapsulating field inspection"
                          bundle="messages.InspectionBundle"
@@ -41,7 +81,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.EncapsulateFieldInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.refactoring.EncapsulateFieldInspection"/>
         <localInspection language="JAVA"
                          displayName="Network communication inspection"
                          bundle="messages.InspectionBundle"
@@ -51,7 +91,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.NetworkCommunicationInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.NetworkCommunicationInspection"/>
         <localInspection language="JAVA"
                          displayName="Polling inspection"
                          bundle="messages.InspectionBundle"
@@ -61,7 +101,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.PollingInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.PollingInspection"/>
         <localInspection language="JAVA"
                          displayName="Database communication inspection"
                          bundle="messages.InspectionBundle"
@@ -71,7 +111,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.DatabaseCommunicationInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.DatabaseCommunicationInspection"/>
         <localInspection language="JAVA"
                          displayName="File usage inspection"
                          bundle="messages.InspectionBundle"
@@ -81,7 +121,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.FileUsageInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.FileUsageInspection"/>
         <localInspection language="JAVA"
                          displayName="Bulk operations inspection"
                          bundle="messages.InspectionBundle"
@@ -91,7 +131,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.BulkOperationInspection"/>
+                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.BulkOperationInspection"/>
     </extensions>
     <actions>
         <group id="TestPlugin.HelloAction" text="EEA" description="Energy-Effifiency-Assistant">

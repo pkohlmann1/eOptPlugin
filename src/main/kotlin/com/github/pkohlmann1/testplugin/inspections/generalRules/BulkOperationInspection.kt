@@ -1,4 +1,4 @@
-package com.github.pkohlmann1.testplugin.inspections
+package com.github.pkohlmann1.testplugin.inspections.generalRules
 
 import com.github.pkohlmann1.testplugin.detectors.ImportStatementMethodCallDetector
 import com.intellij.codeInspection.LocalInspectionTool
@@ -17,12 +17,15 @@ class BulkOperationInspection : LocalInspectionTool() {
             override fun visitImportStatement(statement: PsiImportStatement) {
                 super.visitImportStatement(statement)
                 val javaFile = statement.containingFile as PsiJavaFile
-                if (ImportStatementMethodCallDetector().detectImportStatements(statement,DATABASE_PACKAGES)) {
-                    this.containsDbImports.add(ImportStatementMethodCallDetector().getImportStatement(statement.importReference!!.qualifiedName,DATABASE_PACKAGES))
+                if (ImportStatementMethodCallDetector().detectImportStatements(statement, DATABASE_PACKAGES)) {
+                    this.containsDbImports.add(ImportStatementMethodCallDetector().getImportStatement(statement.importReference!!.qualifiedName,
+                        DATABASE_PACKAGES
+                    ))
                 }
                 if (ImportStatementMethodCallDetector().detectImportStatements(statement, NETWORK_PACKAGES)) {
                     this.containsNetworkImports.add(ImportStatementMethodCallDetector().getImportStatement(statement.importReference!!.qualifiedName,
-                        NETWORK_PACKAGES))
+                        NETWORK_PACKAGES
+                    ))
                 }
             }
 

@@ -1,8 +1,6 @@
-package com.github.pkohlmann1.testplugin.inspections
+package com.github.pkohlmann1.testplugin.inspections.generalRules
 
-import com.github.pkohlmann1.testplugin.detectors.ImportStatementMethodCallDetector
 import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool
-import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.*
 
