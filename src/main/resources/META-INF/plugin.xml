@@ -154,4 +154,9 @@
     <projectListeners>
         <listener class="com.github.pkohlmann1.testplugin.listeners.MyToolWindowListener" topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
     </projectListeners>
+    <application-components>
+        <component>
+            <implementation-class>com.github.pkohlmann1.testplugin.CPUProfilerAgent</implementation-class>
+        </component>
+    </application-components>
 </idea-plugin>
