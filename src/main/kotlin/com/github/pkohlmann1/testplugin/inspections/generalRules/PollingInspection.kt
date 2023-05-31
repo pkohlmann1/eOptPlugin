@@ -6,6 +6,7 @@ import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.*
 import com.intellij.psi.util.PsiTreeUtil
 
+
 class PollingInspection : LocalInspectionTool() {
 
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
@@ -53,6 +54,27 @@ class PollingInspection : LocalInspectionTool() {
 
                 }
             }
+
+            override fun visitMethod(method: PsiMethod?) {
+                super.visitMethod(method)
+
+                if (method != null) {
+                    val annotations = method.annotations
+
+                    for (annotation in annotations) {
+                        val annotationQualifiedName = annotation.qualifiedName
+
+                        if (annotationQualifiedName == "org.springframework.scheduling.annotation.Scheduled") {
+                                holder.registerProblem(
+                                    method,
+                                    "Code uses ScheduledMethod method, which executes code in regular intervals",
+                                    ProblemHighlightType.WARNING
+                                )
+                        }
+                    }
+                }
+            }
+
         }
     }
 

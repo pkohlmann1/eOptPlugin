@@ -112,16 +112,16 @@
                          enabledByDefault="true"
                          level="WARNING"
                          implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.DatabaseCommunicationInspection"/>
-        <localInspection language="JAVA"
-                         displayName="File usage inspection"
-                         bundle="messages.InspectionBundle"
-                         key="inspection.detecting.file.usage.display.name"
-                         groupPath="Java"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.FileUsageInspection"/>
+<!--        <localInspection language="JAVA"-->
+<!--                         displayName="File usage inspection"-->
+<!--                         bundle="messages.InspectionBundle"-->
+<!--                         key="inspection.detecting.file.usage.display.name"-->
+<!--                         groupPath="Java"-->
+<!--                         groupBundle="messages.InspectionsBundle"-->
+<!--                         groupKey="group.names.probable.bugs"-->
+<!--                         enabledByDefault="true"-->
+<!--                         level="WARNING"-->
+<!--                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.FileUsageInspection"/>-->
         <localInspection language="JAVA"
                          displayName="Bulk operations inspection"
                          bundle="messages.InspectionBundle"
@@ -153,10 +153,7 @@
     </applicationListeners>
     <projectListeners>
         <listener class="com.github.pkohlmann1.testplugin.listeners.MyToolWindowListener" topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
+        <listener class="com.github.pkohlmann1.testplugin.listeners.CPUUsageListener" topic="com.intellij.execution.ExecutionListener"/>
     </projectListeners>
-    <application-components>
-        <component>
-            <implementation-class>com.github.pkohlmann1.testplugin.CPUProfilerAgent</implementation-class>
-        </component>
-    </application-components>
+
 </idea-plugin>

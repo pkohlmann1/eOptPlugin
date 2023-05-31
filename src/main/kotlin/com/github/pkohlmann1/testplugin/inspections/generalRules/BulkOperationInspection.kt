@@ -82,27 +82,29 @@ class BulkOperationInspection : LocalInspectionTool() {
                     })
 
                     val duplicateCalls = methodCalls.filter { it == methodName }
-                    for (import in containsDbImports){
-                        for (duplicate in duplicateCalls){
-                            if (DATABASE_PACKAGES[import]?.any { duplicate.startsWith(it) } == true){
-                                holder.registerProblem(
-                                    expression,
-                                    "Duplicate method call: $methodName - Diese Methode führt Datenbank-Kommunikation und wird häufiger aufgerufen. Bulk Operations verwenden?",
-                                    ProblemHighlightType.WARNING
-                                )
-                                return
+                    if (duplicateCalls.size > 1){
+                        for (import in containsDbImports){
+                            for (duplicate in duplicateCalls){
+                                if (DATABASE_PACKAGES[import]?.any { duplicate.startsWith(it) } == true){
+                                    holder.registerProblem(
+                                        expression,
+                                        "Duplicate method call: $methodName - Diese Methode führt Datenbank-Kommunikation und wird häufiger aufgerufen. Bulk Operations verwenden?",
+                                        ProblemHighlightType.WARNING
+                                    )
+                                    return
+                                }
                             }
                         }
-                    }
-                    for (import in containsNetworkImports){
-                        for (duplicate in duplicateCalls){
-                            if (NETWORK_PACKAGES[import]?.any { duplicate.startsWith(it) } == true){
-                                holder.registerProblem(
-                                    expression,
-                                    "Duplicate method call: $methodName - Diese Methode führt Netzwerk-Kommunikation und wird häufiger aufgerufen. Bulk Operations verwenden?",
-                                    ProblemHighlightType.WARNING
-                                )
-                                return
+                        for (import in containsNetworkImports){
+                            for (duplicate in duplicateCalls){
+                                if (NETWORK_PACKAGES[import]?.any { duplicate.startsWith(it) } == true){
+                                    holder.registerProblem(
+                                        expression,
+                                        "Duplicate method call: $methodName - Diese Methode führt Netzwerk-Kommunikation und wird häufiger aufgerufen. Bulk Operations verwenden?",
+                                        ProblemHighlightType.WARNING
+                                    )
+                                    return
+                                }
                             }
                         }
                     }
