@@ -5,8 +5,14 @@ import com.intellij.codeInspection.AbstractBaseJavaLocalInspectionTool
 import com.intellij.codeInspection.ProblemHighlightType
 import com.intellij.codeInspection.ProblemsHolder
 import com.intellij.psi.*
+import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl
 import com.intellij.psi.impl.source.tree.java.PsiMethodCallExpressionImpl
 import com.intellij.psi.impl.source.tree.java.PsiNewExpressionImpl
+import org.springframework.util.LinkedMultiValueMap
+
+
+
+
 
 class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
     override fun buildVisitor(holder: ProblemsHolder, isOnTheFly: Boolean): PsiElementVisitor {
@@ -34,17 +40,10 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                                         it, NETWORK_PACKAGES[import]!!, holder)
                                 }
                                 if (exec_method != null) {
-                                    val bodyVar = getDeclaredVariable(method)
+                                    val bodyVar = getDeclaredVariable(method,exec_method)
                                     if (bodyVar != null) {
-                                        for (i in bodyVar.indices){
-                                            val data = (bodyVar[i].firstChild as PsiMethodCallExpressionImpl).argumentList.expressions.get(0)
-                                            if (data.text.contains("file")){
-                                                val dataVar: PsiReferenceExpression = (bodyVar[i].firstChild as PsiMethodCallExpressionImpl).argumentList.expressions.get(1) as PsiReferenceExpression
-                                                getVarOrigin(dataVar, method, holder, file)
-                                            }
-                                        }
+                                        getVarOrigin(bodyVar, method, holder, file)
                                     }
-
                                 }
                             }
                         }
@@ -88,18 +87,42 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
         val variable = bodyExpression?.declaredElements?.firstOrNull() as? PsiVariable
         val initializer = variable?.initializer
         val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
-        val fileExtension = initializer?.text?.removeSurrounding("\"")?.substringAfterLast(".", "")?.trim()
+        var fileExtension: String? = initializer?.text?.removeSurrounding("\"")?.substringAfterLast(".", "")?.substringBeforeLast(")","")?.trim()?.replace("\"", "")
 
-        if (fileExtension != null && fileExtension != "" && !formats.contains(fileExtension)) {
-            holder.registerProblem(
+        if (fileExtension != null && fileExtension != "" && fileExtension.length < 5 && !formats.contains(fileExtension)) {
+            if (bodyExpression != null) {
+                holder.registerProblem(
                     bodyExpression, "Uncompressed Media",
                     ProblemHighlightType.WARNING
                 )
+            }
         } else {
-            val constructorArguments: Array<PsiExpression>? = (initializer as PsiNewExpressionImpl).argumentList?.expressions
-            val argument: PsiReferenceExpression = constructorArguments?.get(0) as PsiReferenceExpression
-            getVarOrigin(argument, method, holder, file)
-        }
+            if (initializer is PsiMethodCallExpressionImpl) {
+                for (expr in initializer.argumentList.expressions) {
+                        getVarOrigin(expr.firstChild.firstChild as PsiReferenceExpression, method,holder, file)
+                    }
+                }
+
+            if (initializer is PsiNewExpressionImpl) {
+                val expectedTypeText = "LinkedMultiValueMap"
+
+                if (initializer.type?.toString()?.contains(expectedTypeText) == true) {
+                    println("hi")
+                    val bodyExpressions = methodBody?.children?.filterIsInstance<PsiExpressionStatement>()?.filter {it.text.contains(".add")}
+                        if (bodyExpressions != null) {
+                            for (i in bodyExpressions.indices){
+                                val data = (bodyExpressions[i].firstChild as PsiMethodCallExpressionImpl).argumentList.expressions.get(0)
+                                if (data.text.contains("file")){
+                                    val dataVar: PsiReferenceExpression = (bodyExpressions[i].firstChild as PsiMethodCallExpressionImpl).argumentList.expressions.get(1) as PsiReferenceExpression
+                                    getVarOrigin(dataVar, method, holder, file)
+                                }
+                            }
+                        }
+                }
+            }
+            }
+
+
     }
 
     private fun findContainingMethodAndGetVarOrigin(
@@ -112,7 +135,7 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                 super.visitMethodCallExpression(expression)
                 val calledMethod: PsiMethod? = expression.resolveMethod()
                 var containingMethod: PsiMethod? = null
-                if (calledMethod == method) {
+                if (calledMethod?.name.equals(method.name)) {
                     var parent: PsiElement? = expression.parent
                     while (parent != null) {
                         if (parent is PsiMethod) {
@@ -134,10 +157,29 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
         file.accept(methodCallVisitor)
     }
 
-    fun getDeclaredVariable(method: PsiMethod): List<PsiExpressionStatement>? {
-        val methodBody = method.body
-        val bodyExpressions = methodBody?.children?.filterIsInstance<PsiExpressionStatement>()
-        return bodyExpressions?.filter {it.text.contains("body.add")}
+    fun getDeclaredVariable(method: PsiMethod, exec_method: PsiMethod): PsiReferenceExpression? {
+
+        var bodyRef: PsiReferenceExpression? = null
+        val parameters = exec_method.parameterList.parameters // Die Parameter der Methode erhalten
+
+        for (parameter in parameters) {
+            val parameterType = parameter.type // Den Typ des Parameters erhalten
+            if (parameterType is PsiClassType) {
+                val parameterClass = parameterType.resolve() // Die Klasse des Parameters auflösen
+                if (parameterClass != null && "org.springframework.http.HttpEntity" == parameterClass.qualifiedName) {
+                    // Der Parameter hat den Typ HttpEntity
+                    val methodBody = method.body
+                    val bodyDeclarations = methodBody?.children?.filterIsInstance<PsiDeclarationStatement>()
+                    val httpEntityVar = bodyDeclarations?.filter{ (it.firstChild as PsiLocalVariableImpl).type.canonicalText.contains("org.springframework.http.HttpEntity")}
+
+                    if (httpEntityVar?.size != 0) {
+                        bodyRef = ((httpEntityVar?.get(0)?.declaredElements?.get(0) as PsiLocalVariableImpl).initializer as PsiNewExpressionImpl).argumentList?.expressions?.get(0) as PsiReferenceExpression?
+                        return bodyRef
+                    }
+                }
+            }
+        }
+        return bodyRef
     }
 
 }

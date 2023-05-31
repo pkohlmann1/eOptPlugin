@@ -4,6 +4,7 @@ import com.intellij.execution.ExecutionListener
 import com.intellij.execution.runners.ExecutionEnvironment
 import java.lang.management.ManagementFactory
 
+
 class CPUUsageListener : ExecutionListener {
 
     override fun processStarted(executorId: String, env: ExecutionEnvironment, handler: ProcessHandler) {
@@ -17,6 +18,7 @@ class CPUUsageListener : ExecutionListener {
 
         var cum_usage: Double = 0.0
         var iterations: Int = 0
+
 
         val cpuMonitoringTask = Runnable {
             while (!handler.isProcessTerminated && !Thread.currentThread().isInterrupted) {
