@@ -11,6 +11,7 @@
     <resource-bundle>messages.InspectionBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
+        <service implementation="com.yourpackage.MyProjectService" service-interface="com.yourpackage.MyProjectService" />
         <toolWindow factoryClass="com.github.pkohlmann1.testplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <localInspection language="JAVA"
                          displayName="Static variable inspection"

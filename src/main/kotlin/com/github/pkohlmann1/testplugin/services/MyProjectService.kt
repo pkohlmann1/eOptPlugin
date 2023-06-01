@@ -7,6 +7,7 @@ import com.github.pkohlmann1.testplugin.MyBundle
 
 @Service(Service.Level.PROJECT)
 class MyProjectService(project: Project) {
+    private val codeLocations: MutableList<CodeLocation> = mutableListOf()
 
     init {
         thisLogger().info(MyBundle.message("projectService", project.name))
@@ -14,4 +15,19 @@ class MyProjectService(project: Project) {
     }
 
     fun getRandomNumber() = (1..100).random()
+
+    fun addCodeLocation(file: String, method: String, variable: String) {
+        val codeLocation = CodeLocation(file, method, variable)
+        codeLocations.add(codeLocation)
+    }
+
+    fun getCodeLocations(): List<CodeLocation> {
+        return codeLocations.toList()
+    }
+
+    fun hasCodeLocation(file: String, method: String, variable: String): Boolean {
+        return codeLocations.any { it.file == file && it.method == method && it.variable == variable }
+    }
 }
+
+data class CodeLocation(val file: String, val method: String, val variable: String)
