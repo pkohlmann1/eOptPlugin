@@ -9,6 +9,7 @@ import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl
 import com.intellij.psi.impl.source.tree.java.PsiMethodCallExpressionImpl
 import com.intellij.psi.impl.source.tree.java.PsiNewExpressionImpl
 import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl
+import com.intellij.psi.util.PsiTreeUtil.firstChild
 import java.util.regex.Pattern
 
 
@@ -19,13 +20,13 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
             override fun visitImportStatement(statement: PsiImportStatement) {
                 super.visitImportStatement(statement)
                 val file = statement.containingFile as PsiJavaFile;
-                    if (ImportStatementMethodCallDetector().detectImportStatements(statement,
+                if (ImportStatementMethodCallDetector().detectImportStatements(statement,
                         NETWORK_PACKAGES
                     )) {
                     this.containsNetworkImports.add(
                         ImportStatementMethodCallDetector().getImportStatement(statement.importReference!!.qualifiedName,
                             NETWORK_PACKAGES
-                    ))
+                        ))
                 }
                 if (containsNetworkImports.size != 0){
                     val methodCallVisitor = object : JavaRecursiveElementVisitor() {
@@ -126,7 +127,7 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                         }
                     }
                 }
-            //Exp wurde durch Aufruf einer new Expression weiterverarbeitet. Verfolge Call Tree weiter nach oben
+                //Exp wurde durch Aufruf einer new Expression weiterverarbeitet. Verfolge Call Tree weiter nach oben
             } else if (initializer is PsiNewExpressionImpl) {
                 val argumentList = initializer.argumentList
                 for (expr in argumentList?.expressions!!) {
@@ -206,58 +207,39 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                         return bodyRef
                     }
                 }
-                else if (parameterClass != null && parameterClass.qualifiedName.equals("java.lang.Object")){
-                    var body_param = (exec_method_call.argumentList.expressions.get(1) as PsiReferenceExpressionImpl)
+                else if (parameterClass != null && parameterClass.qualifiedName == "java.lang.Object") {
+                    val bodyParam = exec_method_call.argumentList.expressions.get(1) as? PsiReferenceExpressionImpl
                     val methodBody = method.body
                     val bodyDeclarations = methodBody?.children?.filterIsInstance<PsiDeclarationStatement>()
-                    val bodyVar = bodyDeclarations?.filter{ (it.firstChild as PsiLocalVariableImpl).name.equals(body_param.referenceName)}
+                    val bodyVar = bodyDeclarations?.firstOrNull { (it.firstChild as? PsiLocalVariableImpl)?.name == bodyParam?.referenceName }
 
-                    if (bodyVar?.size != 0) {
-                        val initializer = (bodyVar?.get(0)?.declaredElements?.get(0) as PsiLocalVariableImpl).initializer
+                    bodyVar?.let {
+                        val initializer = (it.declaredElements.firstOrNull() as? PsiLocalVariableImpl)?.initializer
                         val pattern = Pattern.compile("\".*?\\.([a-zA-Z0-9]+)\"")
 
-                        val matcher = pattern.matcher(initializer.toString().trimIndent())
-                        if (matcher.find()) {
+                        val matcher = pattern.matcher(initializer?.toString()?.trimIndent())
+                        if (matcher?.find() == true) {
                             val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
                             val fileType = matcher.group(1)
                             if (!formats.contains(fileType)) {
                                 holder.registerProblem(
-                                    exec_method_call, "Uncompressed Media" ,
+                                    exec_method_call, "Uncompressed Media",
                                     ProblemHighlightType.WARNING
                                 )
                             }
                         } else {
-                            val variables = extractVariables(initializer.toString().trimIndent())
-                            for (variable in variables) {
-                                val vars = bodyDeclarations.filter{ (it.firstChild as PsiLocalVariableImpl).name.equals(variable)}
-                                if (vars.isNotEmpty()) {
-                                    val initializer = (vars?.get(0)?.declaredElements?.get(0) as PsiLocalVariableImpl).initializer
-                                    val pattern = Pattern.compile("\".*?\\.([a-zA-Z0-9]+)\"")
-
-                                    val matcher = pattern.matcher(initializer.toString().trimIndent())
-                                    if (matcher.find()) {
-                                        val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
-                                        val fileType = matcher.group(1)
-                                        if (!formats.contains(fileType)) {
-                                            holder.registerProblem(
-                                                exec_method_call, "Uncompressed Media" ,
-                                                ProblemHighlightType.WARNING
-                                            )
-                                        }
-                                    }
-                                }
-                            }
+                            checkInitializerVariablesForUncompressedMedia(initializer.toString(), bodyDeclarations, exec_method_call, holder)
                         }
-                        return null
                     }
                 }
+
             }
-        paramCount += 1
+            paramCount += 1
         }
         return bodyRef
     }
 
-    fun extractVariables(expression: String): List<String> {
+    private fun extractVariables(expression: String): List<String> {
         val variablePattern = Pattern.compile("\\b([a-zA-Z]\\w*)\\b(?![\\s\\(])")
         val matcher = variablePattern.matcher(expression)
 
@@ -270,14 +252,33 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
         return variables
     }
 
-    fun checkVariableExistence(variables: List<String>, bodyDeclarations: List<String>) {
+    private fun checkInitializerVariablesForUncompressedMedia(initializerString: String, bodyDeclarations:  List<PsiDeclarationStatement>?, exec_method_call: PsiMethodCallExpression, holder: ProblemsHolder){
+        val pattern = Pattern.compile("\".*?\\.([a-zA-Z0-9]+)\"")
+        val variables = initializerString.trimIndent().let { it1 -> extractVariables(it1) }
         for (variable in variables) {
-            if (bodyDeclarations.contains(variable)) {
-                println("Statement mit dem Namen '$variable' gefunden.")
-            } else {
-                println("Kein Statement mit dem Namen '$variable' gefunden.")
+            val vars = bodyDeclarations?.filter { (it.firstChild as? PsiLocalVariableImpl)?.name == variable }
+            if (vars != null) {
+                if (vars.isNotEmpty()) {
+                    val innerInitializer = (vars?.get(0)?.declaredElements?.get(0) as? PsiLocalVariableImpl)?.initializer
+                    val innerMatcher = pattern.matcher(innerInitializer?.toString()?.trimIndent())
+                    if (innerMatcher.find() == true) {
+                        val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
+                        val fileType = innerMatcher.group(1)
+                        if (!formats.contains(fileType)) {
+                            holder.registerProblem(
+                                exec_method_call, "Uncompressed Media",
+                                ProblemHighlightType.WARNING
+                            )
+                        }
+                    } else {
+                        checkInitializerVariablesForUncompressedMedia(innerInitializer.toString(), bodyDeclarations, exec_method_call, holder)
+                    }
+                }
             }
         }
     }
+
+
+
 
 }
