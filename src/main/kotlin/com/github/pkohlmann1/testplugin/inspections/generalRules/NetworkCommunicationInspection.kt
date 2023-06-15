@@ -8,10 +8,8 @@ import com.intellij.psi.*
 import com.intellij.psi.impl.source.tree.java.PsiLocalVariableImpl
 import com.intellij.psi.impl.source.tree.java.PsiMethodCallExpressionImpl
 import com.intellij.psi.impl.source.tree.java.PsiNewExpressionImpl
-import org.springframework.util.LinkedMultiValueMap
-
-
-
+import com.intellij.psi.impl.source.tree.java.PsiReferenceExpressionImpl
+import java.util.regex.Pattern
 
 
 class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
@@ -40,7 +38,12 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                                         it, NETWORK_PACKAGES[import]!!, holder)
                                 }
                                 if (exec_method != null) {
-                                    val bodyVar = getDeclaredVariable(method,exec_method)
+                                    val bodyVar = exec_method.first?.let {
+                                        exec_method.second?.let { it1 ->
+                                            getHttpBodyVariable(method,
+                                                it, it1, import, holder)
+                                        }
+                                    }
                                     if (bodyVar != null) {
                                         getVarOrigin(bodyVar, method, holder, file)
                                     }
@@ -57,25 +60,31 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
 
     companion object {
         private val NETWORK_PACKAGES: MutableMap<String, Array<String>> = HashMap()
+        private val REQUEST_OBJECTS: MutableMap<String, String> = HashMap()
 
         init {
-            NETWORK_PACKAGES["org.apache.http"] = arrayOf("test")
-            NETWORK_PACKAGES["okhttp3"] = arrayOf("test")
-            NETWORK_PACKAGES["java.net"] = arrayOf("test")
-            NETWORK_PACKAGES["java.io.BufferedReader"] = arrayOf("test")
-            NETWORK_PACKAGES["java.io.InputStreamReader"] = arrayOf("test")
-            NETWORK_PACKAGES["kong.unirest"] = arrayOf("test")
             NETWORK_PACKAGES["org.springframework.http"] = arrayOf("execute","exchange")
-            NETWORK_PACKAGES["org.springframework.web"] = arrayOf("execute","exchange")
-            NETWORK_PACKAGES["retrofit2."] = arrayOf("abc")
-            NETWORK_PACKAGES["javax.ws.rs"] = arrayOf("test")
-            NETWORK_PACKAGES["io.vertex.ext.web"] = arrayOf("test")
-            NETWORK_PACKAGES["com.google.api.client.http"] = arrayOf("test")
-            NETWORK_PACKAGES["java.io"] = arrayOf("printStackTrace")
+            NETWORK_PACKAGES["org.springframework.web"] = arrayOf("execute","exchange", "getForEntity", "getForObject", "postForLocation", "postForObject", "postForEntity", "put", "patchForObject", "delete", "doExecute")
+//            NETWORK_PACKAGES["java.io"] = arrayOf("printStackTrace")
+
+            REQUEST_OBJECTS["org.springframework.http"] = "org.springframework.http.HttpEntity"
+            REQUEST_OBJECTS["org.springframework.web"] = "org.springframework.http.HttpEntity"
+
+//            NETWORK_PACKAGES["retrofit2."] = arrayOf("abc")
+//            NETWORK_PACKAGES["javax.ws.rs"] = arrayOf("test")
+//            NETWORK_PACKAGES["io.vertex.ext.web"] = arrayOf("test")
+//            NETWORK_PACKAGES["com.google.api.client.http"] = arrayOf("test")
+//            NETWORK_PACKAGES["org.apache.http"] = arrayOf("test")
+//            NETWORK_PACKAGES["okhttp3"] = arrayOf("test")
+//            NETWORK_PACKAGES["java.net"] = arrayOf("test")
+//            NETWORK_PACKAGES["java.io.BufferedReader"] = arrayOf("test")
+//            NETWORK_PACKAGES["java.io.InputStreamReader"] = arrayOf("test")
+//            NETWORK_PACKAGES["kong.unirest"] = arrayOf("test")
         }
     }
 
     fun getVarOrigin(exp: PsiReferenceExpression, method: PsiMethod, holder: ProblemsHolder, file: PsiJavaFile): Boolean {
+        // Check if method has exp as Parameter. If so find Containing Method and continue search there
         val parameterList = method.parameterList.parameters
         for (parameter in parameterList) {
             if (parameter.name.equals(exp.referenceName)){
@@ -85,6 +94,7 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                 }
             }
         }
+        // Check if exp references any uncompressed media
         val methodBody = method.body
         val bodyExpression = methodBody?.children?.filterIsInstance<PsiDeclarationStatement>()?.filter { it.text.contains(exp.lastChild.text) }?.get(0)
         val variable = bodyExpression?.declaredElements?.firstOrNull() as? PsiVariable
@@ -92,6 +102,9 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
         val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
         var fileExtension: String? = initializer?.text?.removeSurrounding("\"")?.substringAfterLast(".", "")?.substringBeforeLast(")")?.trim()?.replace("\"", "")
         val expectedTypeText = "LinkedMultiValueMap"
+        if (formats.contains(fileExtension)){
+            return true;
+        }
         if (fileExtension != null && fileExtension != "" && fileExtension.length < 5 && !formats.contains(fileExtension)) {
             if (bodyExpression != null) {
                 holder.registerProblem(
@@ -101,6 +114,7 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                 return true
             }
         } else if (initializer != null) {
+            //Check if Exp ist eine MultiValueMap (Abkürzung für Spring basierte Programme, da immer mit .add auf MultivalueMap gearbeitet werden muss)
             if (initializer.type?.toString()?.contains(expectedTypeText) == true) {
                 val bodyExpressions = methodBody?.children?.filterIsInstance<PsiExpressionStatement>()?.filter {it.text.contains(".add")}
                 if (bodyExpressions != null) {
@@ -108,19 +122,21 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
                         val data = (bodyExpressions[i].firstChild as PsiMethodCallExpressionImpl).argumentList.expressions.get(0)
                         if (data.text.contains("file")){
                             val dataVar: PsiReferenceExpression = (bodyExpressions[i].firstChild as PsiMethodCallExpressionImpl).argumentList.expressions.get(1) as PsiReferenceExpression
-                            getVarOrigin(dataVar, method, holder, file)
+                            return getVarOrigin(dataVar, method, holder, file)
                         }
                     }
                 }
+            //Exp wurde durch Aufruf einer new Expression weiterverarbeitet. Verfolge Call Tree weiter nach oben
             } else if (initializer is PsiNewExpressionImpl) {
                 val argumentList = initializer.argumentList
                 for (expr in argumentList?.expressions!!) {
-                    getVarOrigin(expr as PsiReferenceExpression, method, holder, file)
+                    return getVarOrigin(expr as PsiReferenceExpression, method, holder, file)
                 }
+                //Exp wurde durch Aufruf einers Methodenaufrufs weiterverarbeitet. Verfolge Call Tree weiter nach oben
             } else if (initializer is PsiMethodCallExpressionImpl) {
                 val argumentList = initializer.argumentList
                 for (expr in argumentList.expressions) {
-                    getVarOrigin(expr.firstChild.firstChild as PsiReferenceExpression, method, holder, file)
+                    return getVarOrigin(expr.firstChild.firstChild as PsiReferenceExpression, method, holder, file)
                 }
             }
         }
@@ -161,29 +177,107 @@ class NetworkCommunicationInspection : AbstractBaseJavaLocalInspectionTool() {
         return originFound
     }
 
-    fun getDeclaredVariable(method: PsiMethod, exec_method: PsiMethod): PsiReferenceExpression? {
+    fun getHttpBodyVariable(
+        method: PsiMethod,
+        exec_method: PsiMethod,
+        exec_method_call: PsiMethodCallExpression,
+        imp: String,
+        holder: ProblemsHolder
+    ): PsiReferenceExpression? {
 
         var bodyRef: PsiReferenceExpression? = null
+
+        val import: String? = REQUEST_OBJECTS[imp]
         val parameters = exec_method.parameterList.parameters // Die Parameter der Methode erhalten
 
+        var paramCount = 0
         for (parameter in parameters) {
             val parameterType = parameter.type // Den Typ des Parameters erhalten
             if (parameterType is PsiClassType) {
                 val parameterClass = parameterType.resolve() // Die Klasse des Parameters auflösen
-                if (parameterClass != null && "org.springframework.http.HttpEntity" == parameterClass.qualifiedName) {
+                if (parameterClass != null && import == parameterClass.qualifiedName) {
                     // Der Parameter hat den Typ HttpEntity
                     val methodBody = method.body
                     val bodyDeclarations = methodBody?.children?.filterIsInstance<PsiDeclarationStatement>()
-                    val httpEntityVar = bodyDeclarations?.filter{ (it.firstChild as PsiLocalVariableImpl).type.canonicalText.contains("org.springframework.http.HttpEntity")}
+                    val httpEntityVar = bodyDeclarations?.filter{ (it.firstChild as PsiLocalVariableImpl).type.canonicalText.contains(import.toString())}
 
                     if (httpEntityVar?.size != 0) {
                         bodyRef = ((httpEntityVar?.get(0)?.declaredElements?.get(0) as PsiLocalVariableImpl).initializer as PsiNewExpressionImpl).argumentList?.expressions?.get(0) as PsiReferenceExpression?
                         return bodyRef
                     }
                 }
+                else if (parameterClass != null && parameterClass.qualifiedName.equals("java.lang.Object")){
+                    var body_param = (exec_method_call.argumentList.expressions.get(1) as PsiReferenceExpressionImpl)
+                    val methodBody = method.body
+                    val bodyDeclarations = methodBody?.children?.filterIsInstance<PsiDeclarationStatement>()
+                    val bodyVar = bodyDeclarations?.filter{ (it.firstChild as PsiLocalVariableImpl).name.equals(body_param.referenceName)}
+
+                    if (bodyVar?.size != 0) {
+                        val initializer = (bodyVar?.get(0)?.declaredElements?.get(0) as PsiLocalVariableImpl).initializer
+                        val pattern = Pattern.compile("\".*?\\.([a-zA-Z0-9]+)\"")
+
+                        val matcher = pattern.matcher(initializer.toString().trimIndent())
+                        if (matcher.find()) {
+                            val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
+                            val fileType = matcher.group(1)
+                            if (!formats.contains(fileType)) {
+                                holder.registerProblem(
+                                    exec_method_call, "Uncompressed Media" ,
+                                    ProblemHighlightType.WARNING
+                                )
+                            }
+                        } else {
+                            val variables = extractVariables(initializer.toString().trimIndent())
+                            for (variable in variables) {
+                                val vars = bodyDeclarations.filter{ (it.firstChild as PsiLocalVariableImpl).name.equals(variable)}
+                                if (vars.isNotEmpty()) {
+                                    val initializer = (vars?.get(0)?.declaredElements?.get(0) as PsiLocalVariableImpl).initializer
+                                    val pattern = Pattern.compile("\".*?\\.([a-zA-Z0-9]+)\"")
+
+                                    val matcher = pattern.matcher(initializer.toString().trimIndent())
+                                    if (matcher.find()) {
+                                        val formats = listOf("zip", "gz", "tar", "rar", "7z", "bz2")
+                                        val fileType = matcher.group(1)
+                                        if (!formats.contains(fileType)) {
+                                            holder.registerProblem(
+                                                exec_method_call, "Uncompressed Media" ,
+                                                ProblemHighlightType.WARNING
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        return null
+                    }
+                }
             }
+        paramCount += 1
         }
         return bodyRef
+    }
+
+    fun extractVariables(expression: String): List<String> {
+        val variablePattern = Pattern.compile("\\b([a-zA-Z]\\w*)\\b(?![\\s\\(])")
+        val matcher = variablePattern.matcher(expression)
+
+        val variables = mutableListOf<String>()
+        while (matcher.find()) {
+            val variable = matcher.group(1)
+            variables.add(variable)
+        }
+
+        return variables
+    }
+
+    fun checkVariableExistence(variables: List<String>, bodyDeclarations: List<String>) {
+        for (variable in variables) {
+            if (bodyDeclarations.contains(variable)) {
+                println("Statement mit dem Namen '$variable' gefunden.")
+            } else {
+                println("Kein Statement mit dem Namen '$variable' gefunden.")
+            }
+        }
     }
 
 }

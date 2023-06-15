@@ -54,15 +54,20 @@ class ImportStatementMethodCallDetector {
         className: String,
         invokingMethods: Array<String>,
         holder: ProblemsHolder
-    ): PsiMethod? {
+    ): Pair<PsiMethod?, PsiMethodCallExpression?> {
 
-        var method: PsiMethod? = null;
+        var method: PsiMethod? = null
+        var methodCallExpression: PsiMethodCallExpression? = null
         val methodCallVisitor = object : JavaRecursiveElementVisitor() {
             override fun visitMethodCallExpression(expression: PsiMethodCallExpression) {
                 super.visitMethodCallExpression(expression)
 
                 val calledMethod = expression.resolveMethod()
-                val calledMethodName = calledMethod?.name
+                var calledMethodName = calledMethod?.name
+
+                if(calledMethod == null) {
+                    calledMethodName = expression.methodExpression.referenceName
+                }
 
                 if (calledMethodName != null && invokingMethods.any { calledMethodName.startsWith(it) }) {
 
@@ -71,10 +76,11 @@ class ImportStatementMethodCallDetector {
                         ProblemHighlightType.WARNING
                     )
                     method= calledMethod;
+                    methodCallExpression = expression
                 }
             }
         }
         cont_method.accept(methodCallVisitor)
-        return method;
+        return Pair(method, methodCallExpression);
     }
 }
