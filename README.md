@@ -10,16 +10,13 @@ The plugin is a prototype and therefore offers rudimentary implementations, espe
 
 ## Installation
 
-There are two ways to set up the plugin locally:
+Follow these steps to set up the plugin locally:
 
-1. Clone the github repository 
    1. Clone the repository
    2. Open the eOptPlugin project as a gradle project
    3. Start the plugin by running the "Run plugin" configuration
    4. Open any Java project in the "Test IDE" that opens up
 
-
-2. Download the .jar
 
 ---
 Plugin based on the [IntelliJ Platform Plugin Template][template].
