@@ -1,18 +1,16 @@
 <!-- Plugin Configuration File. Read more: https://plugins.jetbrains.com/docs/intellij/plugin-configuration-file.html -->
 <idea-plugin>
-    <id>com.github.pkohlmann1.testplugin</id>
+    <id>com.github.pkohlmann1.eOptPlugin</id>
     <name>testPlugin Template</name>
     <vendor>pkohlmann1</vendor>
 
     <depends>com.intellij.modules.platform</depends>
     <depends>com.intellij.java</depends>
-
     <resource-bundle>messages.MyBundle</resource-bundle>
     <resource-bundle>messages.InspectionBundle</resource-bundle>
 
     <extensions defaultExtensionNs="com.intellij">
         <service implementation="com.yourpackage.MyProjectService" service-interface="com.yourpackage.MyProjectService" />
-        <toolWindow factoryClass="com.github.pkohlmann1.testplugin.toolWindow.MyToolWindowFactory" id="MyToolWindow"/>
         <localInspection language="JAVA"
                          displayName="Static variable inspection"
                          bundle="messages.InspectionBundle"
@@ -22,7 +20,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.StaticVariablesInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.codeOptimizations.StaticVariablesInspection"/>
         <localInspection language="JAVA"
                          displayName="Prefer int and long types"
                          bundle="messages.InspectionBundle"
@@ -32,17 +30,17 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.TypeOptimizationInspection"/>
-        <localInspection language="JAVA"
-                         displayName="Prefer comparison to zero inspection"
-                         bundle="messages.InspectionBundle"
-                         key="inspection.detecting.comparisonzero.display.name"
-                         groupPath="Java"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.PreferComparisontoZeroInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.codeOptimizations.TypeOptimizationInspection"/>
+<!--        <localInspection language="JAVA"-->
+<!--                         displayName="Prefer comparison to zero inspection"-->
+<!--                         bundle="messages.InspectionBundle"-->
+<!--                         key="inspection.detecting.comparisonzero.display.name"-->
+<!--                         groupPath="Java"-->
+<!--                         groupBundle="messages.InspectionsBundle"-->
+<!--                         groupKey="group.names.probable.bugs"-->
+<!--                         enabledByDefault="true"-->
+<!--                         level="WARNING"-->
+<!--                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.codeOptimizations.PreferComparisontoZeroInspection"/>-->
         <localInspection language="JAVA"
                          displayName="Prefer Integer Loop counters inspection"
                          bundle="messages.InspectionBundle"
@@ -52,7 +50,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.codeOptimizations.PreferIntegerLoopCounterInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.codeOptimizations.PreferIntegerLoopCounterInspection"/>
         <localInspection language="JAVA"
                          displayName="Simplify nested loop inspection"
                          bundle="messages.InspectionBundle"
@@ -62,7 +60,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.refactoring.SimplifyNestedLoopInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.refactoring.SimplifyNestedLoopInspection"/>
         <localInspection language="JAVA"
                          displayName="Introducing explaining variables inspection"
                          bundle="messages.InspectionBundle"
@@ -72,7 +70,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.refactoring.IntroduceExplainingVariableInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.refactoring.IntroduceExplainingVariableInspection"/>
         <localInspection language="JAVA"
                          displayName="Encapsulating field inspection"
                          bundle="messages.InspectionBundle"
@@ -82,7 +80,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.refactoring.EncapsulateFieldInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.refactoring.EncapsulateFieldInspection"/>
         <localInspection language="JAVA"
                          displayName="Network communication inspection"
                          bundle="messages.InspectionBundle"
@@ -92,7 +90,7 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.NetworkCommunicationInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.generalRules.NetworkCommunicationInspection"/>
         <localInspection language="JAVA"
                          displayName="Polling inspection"
                          bundle="messages.InspectionBundle"
@@ -102,27 +100,27 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.PollingInspection"/>
-        <localInspection language="JAVA"
-                         displayName="Database communication inspection"
-                         bundle="messages.InspectionBundle"
-                         key="inspection.database.communication.display.name"
-                         groupPath="Java"
-                         groupBundle="messages.InspectionsBundle"
-                         groupKey="group.names.probable.bugs"
-                         enabledByDefault="true"
-                         level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.DatabaseCommunicationInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.generalRules.PollingInspection"/>
 <!--        <localInspection language="JAVA"-->
-<!--                         displayName="File usage inspection"-->
+<!--                         displayName="Database communication inspection"-->
 <!--                         bundle="messages.InspectionBundle"-->
-<!--                         key="inspection.detecting.file.usage.display.name"-->
+<!--                         key="inspection.database.communication.display.name"-->
 <!--                         groupPath="Java"-->
 <!--                         groupBundle="messages.InspectionsBundle"-->
 <!--                         groupKey="group.names.probable.bugs"-->
 <!--                         enabledByDefault="true"-->
 <!--                         level="WARNING"-->
-<!--                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.FileUsageInspection"/>-->
+<!--                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.generalRules.DatabaseCommunicationInspection"/>-->
+        <localInspection language="JAVA"
+                         displayName="File usage inspection"
+                         bundle="messages.InspectionBundle"
+                         key="inspection.detecting.file.usage.display.name"
+                         groupPath="Java"
+                         groupBundle="messages.InspectionsBundle"
+                         groupKey="group.names.probable.bugs"
+                         enabledByDefault="true"
+                         level="WARNING"
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.generalRules.FileUsageInspection"/>
         <localInspection language="JAVA"
                          displayName="Bulk operations inspection"
                          bundle="messages.InspectionBundle"
@@ -132,29 +130,20 @@
                          groupKey="group.names.probable.bugs"
                          enabledByDefault="true"
                          level="WARNING"
-                         implementationClass="com.github.pkohlmann1.testplugin.inspections.generalRules.BulkOperationInspection"/>
+                         implementationClass="com.github.pkohlmann1.eOptPlugin.inspections.generalRules.BulkOperationInspection"/>
     </extensions>
     <actions>
         <group id="TestPlugin.HelloAction" text="EEA" description="Energy-Effifiency-Assistant">
             <add-to-group group-id="MainMenu" anchor="last"/>
-            <action class="com.github.pkohlmann1.testplugin.actions.About" id="TestPlugin.Actions.About" text="About"/>
-            <action class="com.github.pkohlmann1.testplugin.actions.Instruction" id="TestPlugin.Actions.Instruction" text="Instruction"/>
-            <action class="com.github.pkohlmann1.testplugin.actions.FileChecker" id="TestPlugin.Actions.FileChecker" text="FileChecker"/>
-            <action
-                    id="EditorBasics.EditorIllustrationAction"
-                    class="com.github.pkohlmann1.testplugin.actions.EditorIllustrationAction"
-                    text="Editor Replace Text"
-                    description="Replaces selected text with 'Replacement'."
-            />
+            <action class="com.github.pkohlmann1.eOptPlugin.actions.FileChecker" id="TestPlugin.Actions.FileChecker" text="FileChecker"/>
     </group>
     </actions>
     <applicationListeners>
-        <listener class="com.github.pkohlmann1.testplugin.listeners.MyFrameStateListener" topic="com.intellij.ide.FrameStateListener"/>
-        <listener class="com.github.pkohlmann1.testplugin.listeners.MyVfsListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
+        <listener class="com.github.pkohlmann1.eOptPlugin.listeners.deprecated.MyFrameStateListener" topic="com.intellij.ide.FrameStateListener"/>
+        <listener class="com.github.pkohlmann1.eOptPlugin.listeners.deprecated.MyVfsListener" topic="com.intellij.openapi.vfs.newvfs.BulkFileListener"/>
     </applicationListeners>
     <projectListeners>
-        <listener class="com.github.pkohlmann1.testplugin.listeners.MyToolWindowListener" topic="com.intellij.openapi.wm.ex.ToolWindowManagerListener"/>
-        <listener class="com.github.pkohlmann1.testplugin.listeners.CPUUsageListener" topic="com.intellij.execution.ExecutionListener"/>
+        <listener class="com.github.pkohlmann1.eOptPlugin.listeners.CPUUsageListener" topic="com.intellij.execution.ExecutionListener"/>
     </projectListeners>
 
 </idea-plugin>

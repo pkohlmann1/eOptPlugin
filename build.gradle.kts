@@ -29,6 +29,10 @@ repositories {
 
 dependencies {
     implementation("org.springframework:spring-web:5.3.12")
+    implementation("org.springframework.boot:spring-boot-starter-jdbc:2.5.2")
+    implementation("org.springframework:spring-jdbc:5.3.8")
+    implementation("mysql:mysql-connector-java:8.0.26")
+    implementation("javax.inject:javax.inject:1")
 }
 
 
